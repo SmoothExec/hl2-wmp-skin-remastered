@@ -6,7 +6,8 @@ A remastered version of the classic Half-Life 2 Windows Media Player skin with A
 
 ## Features
 
-- **AI-Upscaled Textures**: All images enhanced using Real-ESRGAN 4x, then resized to original dimensions for crisp, clean visuals
+- **All Original Artwork Upscaled**: Every texture, button, frame, and UI element from the original skin has been AI-enhanced
+- **AI-Upscaled Textures**: Enhanced using Real-ESRGAN 4x, then resized to original dimensions for crisp, clean visuals without changing the skin's layout
 - **Smoother Animations**: Interpolated shutter animation (9 → 17 frames) with 50ms timing
 - **60 FPS UI**: Updated timer intervals for fluid interface response
 - **Smoother Text Scrolling**: Reduced scroll delay (8ms) for buttery smooth song title display
