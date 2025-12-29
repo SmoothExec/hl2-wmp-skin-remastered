@@ -4,6 +4,13 @@ A remastered version of the classic Half-Life 2 Windows Media Player skin with A
 
 ![Demo](demo.gif)
 
+## Downloads
+
+| Version | Description | Status |
+|---------|-------------|--------|
+| [v1.1](hl2_wmp_skin_remastered_v1.1.wmz) | Stable release with upscaled textures | **Recommended** |
+| [v1.2-WIP](hl2_wmp_skin_remastered_v1.2-WIP.wmz) | Adds resizable Info panel (aspect-ratio locked) | Work in Progress |
+
 ## Features
 
 - **All Original Artwork Upscaled**: Every texture, button, frame, and UI element from the original skin has been AI-enhanced
@@ -11,10 +18,11 @@ A remastered version of the classic Half-Life 2 Windows Media Player skin with A
 - **Smoother Animations**: Interpolated shutter animation (9 → 17 frames) with 50ms timing
 - **60 FPS UI**: Updated timer intervals for fluid interface response
 - **Preserved Functionality**: All original features work - shutter animations, transport controls, volume/seek sliders, visualizations
+- **Resizable Info Panel** (v1.2-WIP): Click and drag to resize the "Show Half-Life 2 Information" panel while maintaining aspect ratio
 
 ## Installation
 
-1. Download `hl2_wmp_skin_remastered_v1.1.wmz` from the [Releases](https://github.com/SmoothExec/hl2-wmp-skin-remastered/blob/71ac05399fb41c81b53cb92cae5817c4542e6f07/hl2_wmp_skin_remastered_v1.1.wmz) page
+1. Download the `.wmz` file of your choice from the table above
 2. Double-click the `.wmz` file to install, or copy to:
    ```
    C:\Program Files (x86)\Windows Media Player\Skins\
@@ -43,15 +51,19 @@ A remastered version of the classic Half-Life 2 Windows Media Player skin with A
 
 ### Files Structure
 ```
-├── hl2_wmp_skin_remastered_v1.1.wmz  # Ready-to-install skin
-├── extracted/                         # Working files
-│   ├── hl2_se.wms                    # Skin definition (UTF-16)
-│   ├── hl2.js                        # Animation logic
-│   ├── *.png                         # Upscaled textures
-│   └── *.gif                         # Animation sprites
-└── scripts/
-    ├── modernize_skin.py             # Main processing script
-    └── fix_pink.py                   # Artifact cleanup
+├── hl2_wmp_skin_remastered_v1.1.wmz      # Stable release
+├── hl2_wmp_skin_remastered_v1.2-WIP.wmz  # WIP with resizable Info panel
+├── extracted/                             # Working files
+│   ├── hl2_se.wms                        # Skin definition (UTF-16)
+│   ├── hl2.js                            # Animation logic
+│   ├── *.png                             # Upscaled textures
+│   └── *.gif                             # Animation sprites
+├── scripts/
+│   ├── modernize_skin.py                 # Main processing script
+│   └── fix_pink.py                       # Artifact cleanup
+└── .claude/skills/                        # Development notes
+    ├── wmp-skin-sdk.md                   # WMP Skin SDK reference
+    └── info-panel-resize.md              # Info panel resize implementation
 ```
 
 ## Building from Source

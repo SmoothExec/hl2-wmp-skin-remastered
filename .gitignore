@@ -9,6 +9,7 @@
 # Python
 __pycache__/
 *.pyc
+fix_*.py
 
 # Real-ESRGAN (too large for repo)
 realesrgan/
@@ -16,3 +17,24 @@ realesrgan/
 # IDE
 .vscode/
 .idea/
+
+# Debug screenshots
+correct.png
+no.png
+*.screenshot.png
+
+# Test builds (phonetic code names)
+hl2_wmp_ALPHA.wmz
+hl2_wmp_BRAVO.wmz
+hl2_wmp_CHARLIE.wmz
+hl2_wmp_DELTA.wmz
+hl2_wmp_ECHO.wmz
+hl2_wmp_FOXTROT.wmz
+hl2_wmp_GOLF.wmz
+hl2_wmp_HOTEL.wmz
+hl2_wmp_INDIA.wmz
+hl2_wmp_JULIET.wmz
+hl2_wmp_KILO.wmz
+*_test.wmz
+skankasshoe.wmz
+nul
