@@ -1,6 +1,6 @@
 # Half-Life 2 WMP Skin Remastered
 
-A remastered version of the classic Half-Life 2 Windows Media Player skin with AI-upscaled textures and smoother 60 FPS animations.
+A remastered version of the classic Half-Life 2 Windows Media Player skin with AI-upscaled textures and smoother animations.
 
 ![Demo](demo.gif)
 
@@ -10,12 +10,11 @@ A remastered version of the classic Half-Life 2 Windows Media Player skin with A
 - **AI-Upscaled Textures**: Enhanced using Real-ESRGAN 4x, then resized to original dimensions for crisp, clean visuals without changing the skin's layout
 - **Smoother Animations**: Interpolated shutter animation (9 → 17 frames) with 50ms timing
 - **60 FPS UI**: Updated timer intervals for fluid interface response
-- **Smoother Text Scrolling**: Reduced scroll delay (8ms) for buttery smooth song title display
 - **Preserved Functionality**: All original features work - shutter animations, transport controls, volume/seek sliders, visualizations
 
 ## Installation
 
-1. Download `hl2_wmp_skin_remastered_v1.wmz` from the [Releases](../../releases) page
+1. Download `hl2_wmp_skin_remastered_v1.1.wmz` from the [Releases](../../releases) page
 2. Double-click the `.wmz` file to install, or copy to:
    ```
    C:\Program Files (x86)\Windows Media Player\Skins\
@@ -41,20 +40,18 @@ A remastered version of the classic Half-Life 2 Windows Media Player skin with A
 | UI Timer | 100ms | 16ms |
 | Shutter Frames | 9 | 17 |
 | Frame Timing | 100ms | 50ms |
-| Scroll Delay | 80ms | 8ms |
 
 ### Files Structure
 ```
-├── hl2_wmp_skin_remastered_v1.wmz  # Ready-to-install skin
-├── hl2_wmp_skin.wmz                # Original backup
-├── extracted/                       # Working files
-│   ├── hl2_se.wms                  # Skin definition (UTF-16)
-│   ├── hl2.js                      # Animation logic
-│   ├── *.png                       # Upscaled textures
-│   └── *.gif                       # Animation sprites
+├── hl2_wmp_skin_remastered_v1.1.wmz  # Ready-to-install skin
+├── extracted/                         # Working files
+│   ├── hl2_se.wms                    # Skin definition (UTF-16)
+│   ├── hl2.js                        # Animation logic
+│   ├── *.png                         # Upscaled textures
+│   └── *.gif                         # Animation sprites
 └── scripts/
-    ├── modernize_skin.py           # Main processing script
-    └── fix_pink.py                 # Artifact cleanup
+    ├── modernize_skin.py             # Main processing script
+    └── fix_pink.py                   # Artifact cleanup
 ```
 
 ## Building from Source
