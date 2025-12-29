@@ -2,7 +2,7 @@
 
 A remastered version of the classic Half-Life 2 Windows Media Player skin with AI-upscaled textures and smoother 60 FPS animations.
 
-![Preview](extracted/preview.png)
+![Demo](demo.gif)
 
 ## Features
 
