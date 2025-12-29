@@ -3,10 +3,12 @@
 ## Overview
 Adding click-to-drag resize functionality to the "Show Half-Life 2 Information" panel (infoView) in this WMP skin remaster. The resize maintains aspect ratio (283:388) and all elements scale proportionally.
 
-## Current Status: v1.2-WIP
-- Resizing works with aspect ratio lock
-- X button, grabber, menu buttons scale correctly using Container Pattern
-- **Known issues**: Some magenta artifacts, artwork/screenshots display needs refinement
+## Current Status: v1.2.3
+- Resizing works with aspect ratio lock (100%-150%)
+- Frame uses nineGridMargins for clean border scaling
+- X button and grabber stay fixed size, only reposition
+- Menu buttons use ratio-based positioning to overlay background text
+- **Known issues**: Some magenta artifacts still appear at certain sizes; menu button alignment needs fine-tuning
 
 ## Key Files
 
@@ -18,59 +20,81 @@ Adding click-to-drag resize functionality to the "Show Half-Life 2 Information" 
 ### JavaScript
 - **Path**: `extracted/hl2.js`
 - **Encoding**: latin-1 (NOT UTF-8!)
-- **Key function**: `infoResize()` - called every 50ms via timer to reposition elements
+- **Key function**: `infoResize()` - called on load and every 50ms via timer
 
 ### Images (Original Dimensions)
 | Image | Size | Purpose |
 |-------|------|---------|
-| c_back.png | 283x388 | Outer frame with transparency |
+| c_back.png | 283x388 | Outer frame with magenta transparency |
 | c_back.jpg | 217x302 | Content area (Gordon Freeman + menu text) |
-| c_menu_no.jpg | 208x100 | Menu buttons (Artwork/Screenshots/Web) |
-| vid_set_no.png | 68x23 | Close button (X) |
-| f_resize.png | 34x30 | Resize grabber handle |
+| c_menu_no.jpg | 208x100 | Menu buttons (Artwork/Screenshots/Web) - overlays c_back.jpg text |
+| vid_set_no.png | 68x23 | Close button (X) - FIXED SIZE |
+| f_resize.png | 34x30 | Resize grabber handle - FIXED SIZE |
 
-## Architecture: Container Pattern
+## Architecture
 
-### The Problem
-Buttongroups inside a parent with `resizeImages="true"` cannot have their size controlled by JS. They stay at their XML-defined size while the parent's background scales.
+### Frame Scaling with nineGridMargins
+The frame (c_back.png) uses `nineGridMargins="34,48,40,55"` for non-uniform scaling:
+- Corners stay fixed size (never scale)
+- Edges only stretch in one direction (maintain thickness)
+- Only the center (transparent area) stretches both ways
 
-### The Solution
-Use the **Container Pattern**:
-1. Separate background images from interactive elements
-2. Put each buttongroup in its OWN container subview
-3. JS controls container size
-4. Inner buttongroup uses `horizontalAlignment="stretch" verticalAlignment="stretch"` to fill container
+This prevents the metallic border from getting thicker when resized.
 
-### Element Hierarchy (v1.2-WIP)
+### Fixed vs Scaled Elements
+**Fixed Size (only reposition):**
+- X button (closeButton): 68x23, anchored to top-right
+- Resize grabber (resizeHandle): 34x30, anchored to bottom-right
+
+**Scaled Elements:**
+- Content area (menuBack, infoSub): Fills space between fixed frame margins
+- Menu buttons: Use ratio-based positioning relative to menuBack
+
+### Content Area Calculation
+Content area is calculated from fixed frame margins, NOT scaled from original:
+```javascript
+var frameLeft = 34, frameTop = 48, frameRight = 40, frameBottom = 55;
+var overlap = 6;  // Extend under frame to hide gaps
+var bottomExtra = 20;  // Extra bottom coverage
+
+var contentLeft = frameLeft - overlap;  // 28
+var contentTop = frameTop - overlap;    // 42
+var contentWidth = view.width - frameLeft - frameRight + (overlap * 2);
+var contentHeight = view.height - frameTop - frameBottom + (overlap * 2) + bottomExtra;
 ```
-VIEW (infoView) - 283x388, aspect-ratio locked
-├── SUBVIEW (frame) - stretch both, zIndex 10
-│   └── backgroundImage: c_back.png
+
+### Ratio-Based Button Positioning
+Menu buttons MUST overlay the background text exactly. Use ratios based on original dimensions:
+```javascript
+// Original: menuBack=217x302, buttons at (4,199) with size 208x100
+var btnRatioX = 4 / 217;    // Position ratio
+var btnRatioY = 199 / 302;
+var btnRatioW = 208 / 217;  // Size ratio
+var btnRatioH = 100 / 302;
+
+menuBtnContainer.left = menuBack.left + Math.round(menuBack.width * btnRatioX);
+menuBtnContainer.top = menuBack.top + Math.round(menuBack.height * btnRatioY);
+menuBtnContainer.width = Math.round(menuBack.width * btnRatioW);
+menuBtnContainer.height = Math.round(menuBack.height * btnRatioH);
+```
+
+## Element Hierarchy (v1.2.3)
+```
+VIEW (infoView) - 283x388 to 425x582, aspect-ratio locked
+├── SUBVIEW (frame) - nineGridMargins, zIndex 10
+│   └── backgroundImage: c_back.png, transparencyColor=#ff00ff
 ├── SUBVIEW (menuBack) - JS positioned, zIndex 20
-│   └── backgroundImage: c_back.jpg (MUST keep this ID for showInfo())
-├── SUBVIEW (menuBtnContainer) - JS positioned, zIndex 22
-│   └── BUTTONGROUP (menuBackButtons) - stretch to fill
+│   └── backgroundImage: c_back.jpg (has menu text printed on it)
+├── SUBVIEW (menuBtnContainer) - ratio-based position, zIndex 22
+│   └── BUTTONGROUP (menuBackButtons) - overlays menuBack text
 ├── SUBVIEW (infoSub) - matches menuBack, zIndex 25
-│   └── For artwork/screenshot overlays
-├── SUBVIEW (closeButton) - JS positioned, zIndex 30
-│   └── BUTTONGROUP - stretch to fill
-├── SUBVIEW (infoMenuBack) - JS positioned, zIndex 30
-│   └── BUTTON - stretch to fill
-├── SUBVIEW (infoNavSub) - JS positioned, zIndex 30
-│   └── BUTTONGROUP with prev/next
-├── SUBVIEW (link1) - JS positioned, zIndex 30
-│   └── BUTTONGROUP - stretch to fill
-└── SUBVIEW (resizeHandle) - JS positioned, zIndex 50
-    └── BUTTON - stretch to fill
+│   └── For artwork/screenshot overlays, resizeBackgroundImage=true
+├── SUBVIEW (closeButton) - FIXED 68x23, zIndex 30
+│   └── BUTTONGROUP - NO resizeImages
+├── SUBVIEW (resizeHandle) - FIXED 34x30, zIndex 50
+│   └── BUTTON - NO resizeImages
+└── ... other elements (infoMenuBack, infoNavSub, link1)
 ```
-
-### Critical: Preserve Element IDs
-The existing `showInfo()` function references:
-- `menuBack.backgroundImage` - for setting content
-- `menuBackButtons.visible` - for hiding menu
-- `infoSub` - for artwork/screenshots overlay
-
-**Never rename these IDs** or existing functionality breaks!
 
 ## JavaScript Resize Function
 
@@ -78,58 +102,120 @@ The existing `showInfo()` function references:
 var INFO_BASE_W = 283;
 var INFO_BASE_H = 388;
 var INFO_RATIO = INFO_BASE_W / INFO_BASE_H;
-var infoLastW = 283;
 
 function infoResize() {
-    // Lock aspect ratio
-    if (view.width != infoLastW) {
+    // Enforce aspect ratio
+    var currentRatio = view.width / view.height;
+    if (currentRatio > INFO_RATIO) {
+        view.width = Math.round(view.height * INFO_RATIO);
+    } else if (currentRatio < INFO_RATIO) {
         view.height = Math.round(view.width / INFO_RATIO);
-        infoLastW = view.width;
     }
 
-    var s = view.width / INFO_BASE_W;  // Single scale factor (aspect locked)
+    // Content area from fixed frame margins
+    var frameLeft = 34, frameTop = 48, frameRight = 40, frameBottom = 55;
+    var overlap = 6, bottomExtra = 20;
 
-    // Position all elements using scale factor
-    menuBack.left = Math.round(34 * s);
-    menuBack.top = Math.round(48 * s);
-    menuBack.width = Math.round(217 * s);
-    menuBack.height = Math.round(302 * s);
+    var contentLeft = frameLeft - overlap;
+    var contentTop = frameTop - overlap;
+    var contentWidth = view.width - frameLeft - frameRight + (overlap * 2);
+    var contentHeight = view.height - frameTop - frameBottom + (overlap * 2) + bottomExtra;
 
-    // Menu buttons at ABSOLUTE position (not inside menuBack)
-    menuBtnContainer.left = Math.round(38 * s);  // 34 + 4
-    menuBtnContainer.top = Math.round(247 * s);  // 48 + 199
-    menuBtnContainer.width = Math.round(208 * s);
-    menuBtnContainer.height = Math.round(100 * s);
+    // Position content elements
+    menuBack.left = contentLeft;
+    menuBack.top = contentTop;
+    menuBack.width = contentWidth;
+    menuBack.height = contentHeight;
 
-    // ... other elements follow same pattern
+    // ... etc
 }
 ```
 
-## Original Element Positions (at 283x388)
-
-| Element | Left | Top | Width | Height | Notes |
-|---------|------|-----|-------|--------|-------|
-| menuBack | 34 | 48 | 217 | 302 | Content background |
-| menuBtnContainer | 38 | 247 | 208 | 100 | Menu buttons (absolute) |
-| closeButton | 207 | 5 | 68 | 23 | X button |
-| resizeHandle | 249 | 358 | 34 | 30 | Bottom-right grabber |
-| infoMenuBack | 37 | 331 | 58 | 16 | Return button |
-| infoNavSub | 200 | 332 | 47 | 17 | Prev/Next buttons |
-| link1 | 49 | 168 | 185 | 61 | Web links overlay |
-
-## WMS Timer Setup
+## WMS Configuration
 
 ```xml
-<view id="infoView"
-      timerInterval="50"
-      onTimer="infoResize();"
+<view id="infoView" width="283" height="388"
       minWidth="283" minHeight="388"
-      resizAble="true" ... >
+      maxWidth="425" maxHeight="582"
+      resizAble="true" timerInterval="50"
+      onTimer="infoResize();" onLoad="loadInfoPrefs();infoResize();" ... >
+
+    <!-- Frame with nineGridMargins -->
+    <subview zIndex="10" horizontalAlignment="stretch" verticalAlignment="stretch"
+        backgroundImage="c_back.png" transparencyColor="#ff00ff"
+        resizeImages="true" nineGridMargins="34,48,40,55" />
+
+    <!-- X button - NO resizeImages, fixed size -->
+    <subview id="closeButton" zIndex="30" left="207" top="5" width="68" height="23">
+        <buttongroup ... mappingImage="pl_set_map.png" >
+            <!-- NO resizeImages attribute -->
+        </buttongroup>
+    </subview>
+</view>
 ```
 
-**Note**: Minimum timerInterval is 50ms (values below 50 except 0 cause errors).
+## Image Loading Pattern (Occlude-Load-Rescale-Reveal)
 
-## Build Script Template
+When loading new images dynamically, follow this EXACT order:
+
+```javascript
+function infoNavNext(){
+    // 1. OCCLUDE - hide before loading
+    infoSub.alphaBlend = 0;
+
+    // 2. LOAD - set new image
+    infoSub.backgroundImage = "c_sub_" + infoMode + "_" + navGo + ".jpg";
+
+    // 3. RESCALE - force resize event immediately
+    forceInfoSubRescale();
+
+    // 4. Update nav states
+    navCheck();
+
+    // 5. REVEAL - fade in (fast 150ms)
+    infoSub.alphaBlendTo(255, 150);
+}
+```
+
+**Critical Points:**
+- `alphaBlend = 0` MUST be set BEFORE changing `backgroundImage`
+- Call `forceInfoSubRescale()` BEFORE starting the fade-in
+- Use 150ms fade for snappy response
+
+## Force Rescale Technique
+
+```javascript
+function forceInfoSubRescale() {
+    var overlap = 6, bottomExtra = 20;
+    var contentLeft = 34 - overlap;
+    var contentTop = 48 - overlap;
+    var targetW = view.width - 34 - 40 + (overlap * 2);
+    var targetH = view.height - 48 - 55 + (overlap * 2) + bottomExtra;
+
+    // Set position first
+    infoSub.left = contentLeft;
+    infoSub.top = contentTop;
+
+    // Jiggle size to trigger resize event
+    infoSub.width = targetW + 1;
+    infoSub.height = targetH + 1;
+    infoSub.width = targetW;
+    infoSub.height = targetH;
+}
+```
+
+## Initialization
+- `infoResize()` is called on `onLoad` AND via timer (every 50ms)
+- XML initial positions should match JS calculations at minimum size
+- This prevents visual glitches when first opening the panel
+
+## Known Issues / TODO
+
+1. **Magenta artifacts**: Still appear at certain sizes during resize - needs investigation
+2. **Menu button alignment**: Artwork/Screenshots/Web Destinations buttons need fine-tuning to perfectly overlay background at all sizes
+3. **Potential fix for magenta**: May need to pre-upscale frame image with bleed guard technique (see wmp-skin-sdk.md)
+
+## Build Script
 
 ```python
 #!/usr/bin/env python3
@@ -138,93 +224,17 @@ import zipfile, os
 # Read/modify JS (latin-1 encoding!)
 with open('extracted/hl2.js', 'r', encoding='latin-1') as f:
     js = f.read()
-# ... modify js ...
-with open('extracted/hl2.js', 'w', encoding='latin-1') as f:
-    f.write(js)
 
 # Read/modify WMS (UTF-16 encoding!)
 with open('extracted/hl2_se.wms', 'r', encoding='utf-16') as f:
     wms = f.read()
-# ... modify wms ...
-with open('extracted/hl2_se.wms', 'w', encoding='utf-16') as f:
-    f.write(wms)
 
-# Rebuild WMZ
-with zipfile.ZipFile('output.wmz', 'w', zipfile.ZIP_DEFLATED) as zf:
+# Rebuild WMZ (exclude backup files)
+with zipfile.ZipFile('hl2_wmp_skin_remastered_v1.1.wmz', 'w', zipfile.ZIP_DEFLATED) as zf:
     for f in os.listdir('extracted'):
-        if not f.endswith('_upscaled.png'):
-            fpath = os.path.join('extracted', f)
-            if os.path.isfile(fpath):
-                zf.write(fpath, f)
+        if '_upscaled.png' in f or '_original.png' in f:
+            continue
+        fpath = os.path.join('extracted', f)
+        if os.path.isfile(fpath):
+            zf.write(fpath, f)
 ```
-
-## Nav Buttons (navPrev/navNext)
-
-Nav buttons require special handling because they need **individual images** (not a buttongroup):
-
-```xml
-<!-- Two separate buttons with their own images -->
-<subview id="infoNavSub" left="200" top="332" width="47" height="17" visible="false">
-    <button id="navPrev" left="0" width="19" verticalAlignment="stretch"
-        image="c_nav_prev_no.png" hoverImage="c_nav_prev_hov.png" ... />
-    <button id="navNext" left="28" width="19" verticalAlignment="stretch"
-        image="c_nav_next_no.png" hoverImage="c_nav_next_hov.png" ... />
-</subview>
-```
-
-**JS must scale buttons within container:**
-```javascript
-var navScale = infoNavSub.width / 47;
-navPrev.left = 0;
-navPrev.width = Math.round(19 * navScale);
-navPrev.height = infoNavSub.height;
-navNext.left = Math.round(28 * navScale);
-navNext.width = Math.round(19 * navScale);
-navNext.height = infoNavSub.height;
-```
-
-## Critical Fix: Force Rescale for Dynamic Images
-
-**Problem**: `resizeBackgroundImage` only triggers on actual resize EVENTS, not when:
-- Dimensions are set via JavaScript
-- New images are loaded dynamically
-
-**Solution**: Force a resize event by "jiggling" dimensions (+1 then back):
-
-```javascript
-function forceInfoSubRescale() {
-    var s = view.width / 283;
-    var targetW = Math.round(217 * s);
-    var targetH = Math.round(302 * s);
-    // Jiggle triggers resize event
-    infoSub.width = targetW + 1;
-    infoSub.height = targetH + 1;
-    infoSub.width = targetW;
-    infoSub.height = targetH;
-}
-```
-
-**Apply this rescale:**
-1. Every timer tick in `infoResize()` - keeps images scaled during drag
-2. After setting new `backgroundImage` in `infoNavNext()`/`infoNavPrev()`
-
-**Also requires**: Initial `backgroundImage` in XML (not empty string) for `resizeBackgroundImage` to work at all.
-
-## Aspect Ratio Enforcement
-
-Compare current ratio to target ratio every frame and correct:
-
-```javascript
-var currentRatio = view.width / view.height;
-if (currentRatio > INFO_RATIO) {
-    view.width = Math.round(view.height * INFO_RATIO);
-} else if (currentRatio < INFO_RATIO) {
-    view.height = Math.round(view.width / INFO_RATIO);
-}
-```
-
-This handles diagonal mouse movement during resize.
-
-## Known Issues / TODO
-
-1. **Magenta artifacts**: Frame transparency (#ff00ff) shows at some sizes

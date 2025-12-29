@@ -248,6 +248,41 @@ element.height = targetH;
 ```
 **Also**: Element must have an initial `backgroundImage` in XML (not empty) for `resizeBackgroundImage` to work.
 
+### Issue: Flash of Unscaled Image on Dynamic Load
+**Cause**: When setting a new backgroundImage, the image may briefly display at native size before the rescale runs.
+**Solution**: Use the Occlude-Load-Rescale-Reveal pattern:
+```javascript
+// 1. OCCLUDE - hide before loading
+element.alphaBlend = 0;
+
+// 2. LOAD - set new image
+element.backgroundImage = newImage;
+
+// 3. RESCALE - force resize event
+element.width = targetW + 1;
+element.height = targetH + 1;
+element.width = targetW;
+element.height = targetH;
+
+// 4. REVEAL - fade in (150ms for snappy feel)
+element.alphaBlendTo(255, 150);
+```
+**Critical**: `alphaBlend = 0` MUST be set BEFORE changing `backgroundImage`, not after.
+
+### Issue: Magenta Bleed Artifacts When Upscaling
+**Cause**: WMP's bilinear interpolation mixes magenta (#ff00ff) transparency color with edge pixels when upscaling.
+**Solution**: Pre-upscale images to max size with "bleed guard":
+1. Expand edge pixels 3-4 pixels INTO the magenta area (copy edge color)
+2. Upscale to max size using LANCZOS
+3. Re-apply magenta mask using NEAREST neighbor from original (no interpolation)
+4. WMP will only downscale (which doesn't cause artifacts)
+
+```python
+# Bleed guard - extend edges into magenta before upscaling
+for iteration in range(bleed_radius):
+    # Find magenta adjacent to content, copy content color into magenta
+```
+
 ### Issue: Non-Uniform Scaling of Frame
 **Cause**: Using `resizeImages="true"` without nineGridMargins scales entire image uniformly.
 **Solution**: Use `nineGridMargins` to preserve corners and scale only edges/center.

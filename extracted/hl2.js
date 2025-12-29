@@ -1709,37 +1709,39 @@ navGo = 1;
 
 
 function infoNavNext(){
+	// HIDE FIRST - occlude before loading new image
+	infoSub.alphaBlend = 0;
 
 	// Set artwork
 	infoSub.backgroundImage = "c_sub_" + infoMode + "_" + navGo + ".jpg";
 
-	// FORCE RESCALE - trigger resize event
+	// FORCE RESCALE - trigger resize event immediately
 	forceInfoSubRescale();
 
-	// Fade in
-	infoSub.alphaBlend = 0;
-	infoSub.alphaBlendTo(255, 200);
-
+	// Update nav button states
 	navCheck();
 
+	// Fade in (fast 150ms)
+	infoSub.alphaBlendTo(255, 150);
 }
 
 
 
 function infoNavPrev(){
+	// HIDE FIRST - occlude before loading new image
+	infoSub.alphaBlend = 0;
 
 	// Set artwork
 	infoSub.backgroundImage = "c_sub_" + infoMode + "_" + navGo + ".jpg";
 
-	// FORCE RESCALE
+	// FORCE RESCALE - trigger resize event immediately
 	forceInfoSubRescale();
 
-	// Fade in
-	infoSub.alphaBlend = 0;
-	infoSub.alphaBlendTo(255, 200);
-
+	// Update nav button states
 	navCheck();
 
+	// Fade in (fast 150ms)
+	infoSub.alphaBlendTo(255, 150);
 }
 
 
@@ -1765,11 +1767,6 @@ function navCheck(){
 		navPrev.enabled = true;
 
 	}
-
-
-
-	infoSub.alphaBlendTo(255,500);
-
 }
 
 
@@ -1802,40 +1799,61 @@ function infoResize() {
 
     var s = view.width / INFO_BASE_W;
 
-    // menuBack
-    menuBack.left = Math.round(34 * s);
-    menuBack.top = Math.round(48 * s);
-    menuBack.width = Math.round(217 * s);
-    menuBack.height = Math.round(302 * s);
+    // Frame has fixed margins (nineGridMargins): left=34, top=48, right=40, bottom=55
+    // Content area fills the space between these fixed borders
+    var frameLeft = 34;
+    var frameTop = 48;
+    var frameRight = 40;
+    var frameBottom = 55;
+    var overlap = 6;  // Extend under frame edge to hide gaps
+    var bottomExtra = 20;  // Extra coverage at bottom to prevent pink
 
-    // infoSub - FORCE RESCALE by changing dimensions
-    var targetW = Math.round(217 * s);
-    var targetH = Math.round(302 * s);
-    infoSub.left = Math.round(34 * s);
-    infoSub.top = Math.round(48 * s);
+    var contentLeft = frameLeft - overlap;
+    var contentTop = frameTop - overlap;
+    var contentWidth = view.width - frameLeft - frameRight + (overlap * 2);
+    var contentHeight = view.height - frameTop - frameBottom + (overlap * 2) + bottomExtra;
+
+    // menuBack - fills content area
+    menuBack.left = contentLeft;
+    menuBack.top = contentTop;
+    menuBack.width = contentWidth;
+    menuBack.height = contentHeight;
+
+    // infoSub - same as menuBack
+    var targetW = contentWidth;
+    var targetH = contentHeight;
+    infoSub.left = contentLeft;
+    infoSub.top = contentTop;
     // Jiggle +1 then set correct - triggers resize event
     infoSub.width = targetW + 1;
     infoSub.height = targetH + 1;
     infoSub.width = targetW;
     infoSub.height = targetH;
 
-    // Menu buttons container
-    menuBtnContainer.left = Math.round(38 * s);
-    menuBtnContainer.top = Math.round(247 * s);
-    menuBtnContainer.width = Math.round(208 * s);
-    menuBtnContainer.height = Math.round(100 * s);
+    // Menu buttons container - MUST overlay background text EXACTLY
+    // Original: menuBack=217x302, buttons at (4,199) with size 208x100
+    // Use fixed RATIOS so they always align regardless of size
+    var btnRatioX = 4 / 217;      // 0.0184
+    var btnRatioY = 199 / 302;    // 0.659
+    var btnRatioW = 208 / 217;    // 0.958
+    var btnRatioH = 100 / 302;    // 0.331
 
-    // X button
-    closeButton.left = Math.round(207 * s);
-    closeButton.top = Math.round(5 * s);
-    closeButton.width = Math.round(68 * s);
-    closeButton.height = Math.round(23 * s);
+    menuBtnContainer.left = menuBack.left + Math.round(menuBack.width * btnRatioX);
+    menuBtnContainer.top = menuBack.top + Math.round(menuBack.height * btnRatioY);
+    menuBtnContainer.width = Math.round(menuBack.width * btnRatioW);
+    menuBtnContainer.height = Math.round(menuBack.height * btnRatioH);
 
-    // Resize handle
-    resizeHandle.width = Math.round(34 * s);
-    resizeHandle.height = Math.round(30 * s);
-    resizeHandle.left = view.width - resizeHandle.width;
-    resizeHandle.top = view.height - resizeHandle.height;
+    // X button - fixed size, position anchored to top-right
+    closeButton.width = 68;
+    closeButton.height = 23;
+    closeButton.left = view.width - 68 - 8;  // 8px from right edge
+    closeButton.top = 5;
+
+    // Resize handle - fixed size, anchored to bottom-right corner
+    resizeHandle.width = 34;
+    resizeHandle.height = 30;
+    resizeHandle.left = view.width - 34;
+    resizeHandle.top = view.height - 30;
 
     // Return button
     infoMenuBack.left = Math.round(37 * s);
@@ -1865,9 +1883,19 @@ function infoResize() {
 
 // Force rescale helper - call after setting new image
 function forceInfoSubRescale() {
-    var s = view.width / 283;
-    var targetW = Math.round(217 * s);
-    var targetH = Math.round(302 * s);
+    // Match infoResize frame margins exactly
+    var overlap = 6;
+    var bottomExtra = 20;
+    var contentLeft = 34 - overlap;
+    var contentTop = 48 - overlap;
+    var targetW = view.width - 34 - 40 + (overlap * 2);
+    var targetH = view.height - 48 - 55 + (overlap * 2) + bottomExtra;
+
+    // Set position first
+    infoSub.left = contentLeft;
+    infoSub.top = contentTop;
+
+    // Jiggle size to trigger resize event
     infoSub.width = targetW + 1;
     infoSub.height = targetH + 1;
     infoSub.width = targetW;
