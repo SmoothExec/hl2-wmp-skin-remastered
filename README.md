@@ -14,7 +14,7 @@ A remastered version of the classic Half-Life 2 Windows Media Player skin with A
 
 ## Installation
 
-1. Download `hl2_wmp_skin_remastered_v1.1.wmz` from the [Releases]((https://github.com/SmoothExec/hl2-wmp-skin-remastered/blob/71ac05399fb41c81b53cb92cae5817c4542e6f07/hl2_wmp_skin_remastered_v1.1.wmz)) page
+1. Download `hl2_wmp_skin_remastered_v1.1.wmz` from the [Releases](https://github.com/SmoothExec/hl2-wmp-skin-remastered/blob/71ac05399fb41c81b53cb92cae5817c4542e6f07/hl2_wmp_skin_remastered_v1.1.wmz) page
 2. Double-click the `.wmz` file to install, or copy to:
    ```
    C:\Program Files (x86)\Windows Media Player\Skins\
