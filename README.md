@@ -12,7 +12,7 @@ Double-click to install.
 
 - **AI-Upscaled Textures**: Every texture, button, frame, and UI element enhanced using Real-ESRGAN 4x
 - **Resizable Info Panel**: Click and drag to resize the "Half-Life 2 Information" panel (100%-150%, aspect-ratio locked)
-- **Enhanced Audio**: Shutter sound effects cleaned up with high-pass filter, subtle clarity boost, and balanced volume
+- **Enhanced Skin Sound Effects**: Shutter and UI sounds cleaned up with high-pass filter, subtle clarity boost, and balanced volume
 - **Smoother Animations**: Interpolated shutter animation (9 → 17 frames) with 50ms timing
 - **60 FPS UI**: Updated timer intervals for fluid interface response
 - **Preserved Functionality**: All original features work - shutter animations, transport controls, volume/seek sliders, visualizations
@@ -50,7 +50,7 @@ Contributions welcome! I've done my part getting this to a usable state. If you 
 
 ### v1.4.1
 - Fixed aspect ratio constraint (now based on content images, not overall view)
-- Enhanced audio with -15dB volume reduction and clarity improvements
+- Enhanced skin sound effects with -15dB volume reduction and clarity improvements
 - Resizable Info panel with proper scaling
 - Frame uses nineGridMargins for clean border scaling
 - X button and resize grabber stay fixed size
@@ -68,7 +68,8 @@ Contributions welcome! I've done my part getting this to a usable state. If you 
 - X button and resize handle stay fixed size, only reposition
 - Menu buttons use ratio-based positioning to overlay background text
 
-### Audio Enhancement
+### Skin Sound Effects Enhancement
+The skin's built-in sound effects (shutter open/close, UI feedback) were remastered:
 - High-pass filter (80Hz) removes low rumble
 - High-shelf boost (+0.5dB at 8kHz) adds subtle clarity
 - Light compression for punch
