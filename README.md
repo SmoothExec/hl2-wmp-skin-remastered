@@ -4,11 +4,9 @@ A remastered version of the classic Half-Life 2 Windows Media Player skin with A
 
 ![Demo](demo.gif)
 
-## Download
+## [Download v1.4.3](hl2_wmp_skin_remastered_v1.4.3.wmz?raw=true)
 
-| Version | Download |
-|---------|----------|
-| **v1.4.1** | [hl2_wmp_skin_remastered_v1.4.1.wmz](hl2_wmp_skin_remastered_v1.4.1.wmz) |
+Double-click to install.
 
 ## Features
 
@@ -33,7 +31,21 @@ A remastered version of the classic Half-Life 2 Windows Media Player skin with A
 - Windows Media Player 9 or later
 - Windows XP/Vista/7/8/10/11
 
+## Known Issues
+
+The resizable Info panel could use some polish:
+- Element scaling at larger sizes isn't pixel-perfect
+- Occasional magenta pop-in during resize
+
+## Contributing
+
+Contributions welcome! I've done my part getting this to a usable state. If you want to fix the remaining issues or add improvements, PRs are open.
+
 ## Version History
+
+### v1.4.3
+- Info panel now opens to main menu instead of artwork
+- Various scaling fixes
 
 ### v1.4.1
 - Fixed aspect ratio constraint (now based on content images, not overall view)
