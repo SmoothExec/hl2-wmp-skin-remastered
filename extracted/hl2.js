@@ -1786,15 +1786,29 @@ function endAlphaBlend(){
 // ============== INFO PANEL FIXED RATIO RESIZE ==============
 var INFO_BASE_W = 283;
 var INFO_BASE_H = 388;
-var INFO_RATIO = INFO_BASE_W / INFO_BASE_H;
+// Content image dimensions (c_back.jpg, artwork, screenshots)
+var CONTENT_W = 217;
+var CONTENT_H = 302;
+var CONTENT_RATIO = CONTENT_W / CONTENT_H;  // 0.7185
+// Frame fixed margins (from nineGridMargins)
+var FRAME_LEFT = 34, FRAME_TOP = 48, FRAME_RIGHT = 40, FRAME_BOTTOM = 55;
+var FRAME_H_MARGIN = FRAME_LEFT + FRAME_RIGHT;  // 74
+var FRAME_V_MARGIN = FRAME_TOP + FRAME_BOTTOM;  // 103
 
 function infoResize() {
-    // Enforce aspect ratio
-    var currentRatio = view.width / view.height;
-    if (currentRatio > INFO_RATIO) {
-        view.width = Math.round(view.height * INFO_RATIO);
-    } else if (currentRatio < INFO_RATIO) {
-        view.height = Math.round(view.width / INFO_RATIO);
+    // Enforce aspect ratio on CONTENT area, not overall view
+    var contentW = view.width - FRAME_H_MARGIN;
+    var contentH = view.height - FRAME_V_MARGIN;
+    var currentRatio = contentW / contentH;
+
+    if (currentRatio > CONTENT_RATIO) {
+        // Too wide - adjust width
+        contentW = Math.round(contentH * CONTENT_RATIO);
+        view.width = contentW + FRAME_H_MARGIN;
+    } else if (currentRatio < CONTENT_RATIO) {
+        // Too tall - adjust height
+        contentH = Math.round(contentW / CONTENT_RATIO);
+        view.height = contentH + FRAME_V_MARGIN;
     }
 
     var s = view.width / INFO_BASE_W;
